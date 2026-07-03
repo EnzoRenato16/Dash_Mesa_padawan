@@ -36,13 +36,11 @@ jobs:
         run: npm ci
 
       - name: Build
+        # Supabase connection comes from the committed .env.production (public,
+        # RLS-protected values). To keep the keys out of the repo instead, delete
+        # .env.production and set VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY as
+        # repository secrets, then add them back here under `env:`.
         run: npm run build
-        env:
-          # Set these as repository secrets (Settings → Secrets and variables →
-          # Actions) to enable the shared Supabase backend. If left unset, the
-          # app builds with the browser-local fallback and still works.
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
