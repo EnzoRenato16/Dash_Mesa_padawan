@@ -1,12 +1,23 @@
 // Backend client for the app.
 //
-// This used to be the Base44 SDK client that connected to Base44's hosted
-// backend. For a static GitHub Pages deployment it is replaced by a
-// self-contained, browser-local backend (see ./backend) that implements the
-// same API surface: db.auth, db.entities and db.integrations.
+// Picks the backend at build time:
+//   - If VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set, uses Supabase —
+//     REAL shared login + shared data across all people and devices.
+//   - Otherwise falls back to the browser-local backend (data per browser),
+//     so the site still works out of the box with zero configuration.
+//
+// Both implement the same API surface: db.auth, db.entities, db.integrations.
 
-import { db } from './backend';
+import { isSupabaseConfigured } from './supabase/client';
+import { db as localDb } from './backend';
+import { db as supabaseDb } from './supabase';
 
-export { db };
-export const base44 = db;
+export const db = isSupabaseConfigured ? supabaseDb : localDb;
+export const backendMode = isSupabaseConfigured ? 'supabase' : 'local';
+
+if (typeof globalThis !== 'undefined') {
+  globalThis.__B44_DB__ = db;
+}
+
+export { db as base44 };
 export default db;

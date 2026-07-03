@@ -4,110 +4,88 @@ Dashboard de ranking de performance da mesa de assessores (EWZ Capital),
 originalmente criado no Base44 e adaptado para rodar **100% no GitHub Pages**,
 com **frontend e backend funcionando**, incluindo login.
 
-## Como funciona o "backend" no GitHub Pages
+## Dois modos de backend
 
-O GitHub Pages é uma hospedagem **estática** — ele só serve arquivos (HTML, CSS,
-JS) e **não roda servidor**. O Base44 original dependia de um backend hospedado
-(banco de dados, autenticação e upload de arquivos).
+O GitHub Pages é hospedagem **estática** (só serve arquivos, não roda servidor).
+O app suporta dois backends, escolhidos automaticamente:
 
-Para funcionar sem servidor, o backend do Base44 foi substituído por um
-**backend que roda no próprio navegador**, em `src/api/backend/`, com a mesma
-interface usada pelo app (`db.auth`, `db.entities`, `db.integrations`):
+| Modo | Quando é usado | Login | Dados |
+| --- | --- | --- | --- |
+| **Supabase (recomendado)** | Quando as variáveis `VITE_SUPABASE_*` estão configuradas | Compartilhado entre todos | **Compartilhados** — todos veem os mesmos dados, de qualquer aparelho |
+| **Local (fallback)** | Quando não há Supabase configurado | Por navegador | Ficam **só no navegador de cada pessoa** |
 
-- **Autenticação** (`auth.js`): cadastro/login por email e senha. As senhas são
-  guardadas com hash (SHA‑256 + salt) no `localStorage`. Há uma conta de
-  administrador criada automaticamente no primeiro acesso.
-- **Banco de dados** (`entities.js`): as entidades `TeamMember` e `WeeklyEntry`
-  são persistidas no `localStorage` (list/filter/get/create/bulkCreate/update/delete).
-- **Upload de fotos** (`integrations.js`): a imagem é redimensionada no navegador
-  e guardada como *data URL*, sem precisar de storage externo.
+O código do app não muda entre os modos — tudo passa por
+`src/api/base44Client.js`, que escolhe o backend.
 
-### Conta de administrador padrão
+## ✅ Modo compartilhado com Supabase (passo a passo)
 
-No primeiro acesso, uma conta admin é criada:
+Para que **todas as pessoas façam login e vejam os mesmos dados** em qualquer
+celular/computador, use o Supabase (tem plano gratuito):
 
-- **Email:** `admin@mesa.local`
-- **Senha:** `admin123`
+1. **Crie um projeto** em <https://supabase.com> (New project). Guarde a senha do banco.
+2. **Crie as tabelas:** no projeto, vá em **SQL Editor → New query**, cole todo o
+   conteúdo de [`supabase/schema.sql`](supabase/schema.sql) e clique em **Run**.
+3. **Desative a confirmação por email** (para entrar direto após cadastrar):
+   **Authentication → Sign In / Providers → Email** e desligue **“Confirm email”**.
+   (Opcional — se preferir manter, cada pessoa precisa confirmar pelo email.)
+4. **Pegue as chaves:** **Project Settings → API** e copie:
+   - **Project URL** → `VITE_SUPABASE_URL`
+   - **anon public key** → `VITE_SUPABASE_ANON_KEY`
+   (São valores públicos, seguros para o frontend.)
+5. **Configure no GitHub** (para o build do Pages usar o Supabase):
+   **Settings → Secrets and variables → Actions → New repository secret** e crie:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+6. **Publique:** faça o merge na `main`. O GitHub Actions builda e publica. Pronto —
+   cada pessoa cria sua conta (ou faz login) e todos compartilham os mesmos dados.
 
-Faça login com ela ou crie a sua própria conta em **Criar conta**. Recomenda‑se
-trocar essas credenciais (veja "Variáveis de ambiente").
+Para rodar localmente nesse modo, crie um arquivo `.env` (baseado em
+[`.env.example`](.env.example)) com as duas variáveis e rode `npm run dev`.
 
 > A área do líder (abas Histórico, Análise, Equipe e o formulário do Líder)
-> continua protegida pela senha do líder: **`AAAaaa123`** (definida em
-> `src/components/PasswordGate.jsx`).
+> continua protegida por uma senha de líder: **`AAAaaa123`**
+> (em `src/components/PasswordGate.jsx`). Isso é independente do login.
 
-### Importante: onde os dados ficam salvos
+## Modo local (sem configurar nada)
 
-Como não há servidor, **os dados ficam salvos no navegador de cada pessoa**
-(`localStorage`). Ou seja, o que o líder cadastra no computador dele **não
-aparece automaticamente** no navegador de outra pessoa ou em outro dispositivo.
+Se você **não** configurar o Supabase, o app funciona mesmo assim, mas os dados
+ficam **no navegador de cada pessoa** (bom para uso em um único computador, como
+o PC da mesa). Nesse modo há uma conta admin criada no primeiro acesso:
 
-Isso é perfeito para uso individual / em um único computador (por exemplo, o
-computador da mesa). Se você precisar que **todos vejam os mesmos dados** entre
-dispositivos, é necessário um backend compartilhado real — veja a seção
-"Backend compartilhado (opcional)".
+- **Email:** `admin@mesa.local` — **Senha:** `admin123`
+  (personalizável por `VITE_ADMIN_EMAIL` / `VITE_ADMIN_PASSWORD`).
 
 ## Rodar localmente
 
 ```bash
 npm install
-npm run dev
+npm run dev            # desenvolvimento
+npm run build          # gera a versão de produção em dist/
+npm run preview        # testa a versão de produção
 ```
 
-Abra a URL que o Vite imprimir (por padrão `http://localhost:5173`).
+## Como o deploy funciona (GitHub Pages)
 
-Para gerar a versão de produção e testar:
+Deploy automático via GitHub Actions (`.github/workflows/deploy.yml`):
 
-```bash
-npm run build
-npm run preview
-```
-
-## Publicar no GitHub Pages
-
-O deploy é automático via GitHub Actions (`.github/workflows/deploy.yml`):
-
-1. Faça o merge/push deste código para a branch **`main`**.
+1. Push/merge na branch **`main`**.
 2. No GitHub: **Settings → Pages → Build and deployment → Source: “GitHub Actions”**.
-3. A cada push na `main`, o site é construído e publicado. A URL aparece em
-   **Settings → Pages** (algo como `https://<usuário>.github.io/<repositório>/`).
+3. A URL aparece em **Settings → Pages**
+   (`https://<usuário>.github.io/<repositório>/`).
 
-Detalhes que fazem funcionar em qualquer caminho do Pages:
+Detalhes que garantem o funcionamento em qualquer caminho do Pages:
 
-- O roteamento usa **HashRouter** (`/#/login`, `/#/register`…), então links
-  diretos e o refresh da página **não dão 404** (não precisa de regras de
-  reescrita no servidor).
-- O Vite usa `base: './'`, então os arquivos carregam tanto na raiz do domínio
-  quanto em um subcaminho `.../<repositório>/`.
-
-## Variáveis de ambiente (opcionais)
-
-Para definir outra conta admin padrão, crie um arquivo `.env` (ou configure as
-variáveis no build):
-
-```bash
-VITE_ADMIN_EMAIL=voce@empresa.com
-VITE_ADMIN_PASSWORD=umaSenhaForte
-```
-
-Essas variáveis só têm efeito quando **ainda não existe nenhuma conta** (ou seja,
-no primeiro acesso / `localStorage` vazio).
-
-## Backend compartilhado (opcional)
-
-Se precisar que os dados sejam compartilhados entre pessoas/dispositivos, troque
-o backend local por um serviço externo (que funciona junto com um site estático),
-por exemplo **Supabase** ou **Firebase**. Basta reimplementar a mesma interface
-de `src/api/backend/` (`auth`, `entities`, `integrations`) usando o SDK do
-serviço escolhido — o restante do app não precisa mudar, pois tudo passa por
-`src/api/base44Client.js`.
+- Roteamento com **HashRouter** (`/#/login`…): links diretos e refresh **não dão 404**.
+- Vite com `base: './'`: os arquivos carregam tanto na raiz quanto em subcaminho.
 
 ## Estrutura
 
-- `src/api/backend/` — backend local (auth, entidades, integrações).
-- `src/api/base44Client.js` — ponto único que expõe o `db` para o app.
+- `src/api/base44Client.js` — ponto único que expõe o `db` e escolhe o backend.
+- `src/api/supabase/` — backend compartilhado (Supabase: auth + entidades).
+- `src/api/backend/` — backend local (fallback em `localStorage`).
 - `src/pages/` — páginas (Home, Login, Register, ForgotPassword, ResetPassword).
 - `src/components/padawan/` — abas do dashboard (Ranking, Lançamento, Histórico,
   Análise, Equipe, Regras).
 - `src/lib/scoring.js` — regras de pontuação.
+- `supabase/schema.sql` — script para criar as tabelas e políticas no Supabase.
 - `base44/entities/` — esquemas originais das entidades (referência).
