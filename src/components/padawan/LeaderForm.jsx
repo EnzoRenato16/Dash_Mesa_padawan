@@ -84,7 +84,7 @@ export default function LeaderForm({ onSaved }) {
     <div className="rounded-xl border border-[#224030] bg-[#102A1E] p-5 md:p-6">
       <h2 className="font-heading text-lg font-semibold text-[#F3F6F1] mb-4 flex items-baseline gap-2.5">
         Lançamento do líder
-        <span className="font-mono text-[10.5px] uppercase tracking-wider text-[#8FA897] border border-[#224030] px-1.5 py-0.5 rounded">captação · consórcio · patrimônio</span>
+        <span className="font-mono text-[10.5px] uppercase tracking-wider text-[#8FA897] border border-[#224030] px-1.5 py-0.5 rounded">captação · contas totais · patrimônio</span>
       </h2>
 
       <div className="flex flex-col gap-1.5 mb-5">
