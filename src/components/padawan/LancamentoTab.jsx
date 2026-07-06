@@ -32,6 +32,9 @@ export default function LancamentoTab({ onSaved }) {
     contas: 0,
     contas_totais: 0,
     patrimonio_liquido: 0,
+    pipe_proxima_semana: 0,
+    pipe_ip: 0,
+    pipe_ap: 0,
   });
 
   useEffect(() => {
@@ -159,6 +162,17 @@ export default function LancamentoTab({ onSaved }) {
         </Field>
         <Field label="Consórcio (R$)" hint="+2 pts a cada R$ 100k">
           <input type="number" value={form.consorcio || ''} onChange={e => setNum('consorcio', e.target.value)} placeholder="0" className="field-input" min="0" step="1000" />
+        </Field>
+
+        <Divider label="PIPE / Projeções" />
+        <Field label="PIPE da próxima semana (R$)" hint="Projeção de captação para a próxima semana">
+          <input type="number" value={form.pipe_proxima_semana || ''} onChange={e => setNum('pipe_proxima_semana', e.target.value)} placeholder="0" className="field-input" min="0" step="1000" />
+        </Field>
+        <Field label="PIPE IP (R$)" hint="Projeção de IP">
+          <input type="number" value={form.pipe_ip || ''} onChange={e => setNum('pipe_ip', e.target.value)} placeholder="0" className="field-input" min="0" step="1000" />
+        </Field>
+        <Field label="PIPE AP (R$)" hint="Projeção de AP">
+          <input type="number" value={form.pipe_ap || ''} onChange={e => setNum('pipe_ap', e.target.value)} placeholder="0" className="field-input" min="0" step="1000" />
         </Field>
 
       </div>

@@ -34,12 +34,17 @@ function entryToWeekly(e) {
   return {
     week: fmtDateBR(e.week_start),
     captacao: e.captacao || 0,
+    consorcio: e.consorcio || 0,
+    pa: e.pa || 0,
     r1, r2, ip_ap: ip + ap,
     total_reunioes: r1 + r2 + ip + ap,
     receita_escritorio: e.receita_escritorio || 0,
     recomendacoes: e.recomendacoes || 0,
     contas: e.contas || 0,
     contas_totais: e.contas_totais || 0,
+    pipe_proxima_semana: e.pipe_proxima_semana || 0,
+    pipe_ip: e.pipe_ip || 0,
+    pipe_ap: e.pipe_ap || 0,
   };
 }
 
@@ -94,9 +99,11 @@ export default function AnaliseTab({ refreshKey }) {
     const monthlyMap = {};
     mine.forEach(e => {
       const ym = e.week_start.slice(0, 7);
-      if (!monthlyMap[ym]) monthlyMap[ym] = { ym, captacao: 0, r1: 0, r2: 0, ip_ap: 0, receita_escritorio: 0, recomendacoes: 0, contas: 0, contas_totais: 0, patrimonio: 0, pontos: 0, _entries: [] };
+      if (!monthlyMap[ym]) monthlyMap[ym] = { ym, captacao: 0, consorcio: 0, pa: 0, r1: 0, r2: 0, ip_ap: 0, receita_escritorio: 0, recomendacoes: 0, contas: 0, contas_totais: 0, patrimonio: 0, pipe_proxima_semana: 0, pipe_ip: 0, pipe_ap: 0, pontos: 0, _entries: [] };
       const m = monthlyMap[ym];
       m.captacao += e.captacao || 0;
+      m.consorcio += e.consorcio || 0;
+      m.pa += e.pa || 0;
       m.r1 += e.r1 || 0;
       m.r2 += e.r2 || 0;
       m.ip_ap += (e.reuniao_ip || 0) + (e.reuniao_ap || 0);
@@ -105,6 +112,9 @@ export default function AnaliseTab({ refreshKey }) {
       m.contas += e.contas || 0;
       m.contas_totais = e.contas_totais || m.contas_totais;
       m.patrimonio = e.patrimonio_liquido || m.patrimonio;
+      m.pipe_proxima_semana += e.pipe_proxima_semana || 0;
+      m.pipe_ip += e.pipe_ip || 0;
+      m.pipe_ap += e.pipe_ap || 0;
       m.pontos += e.total_points || 0;
       m._entries.push(e);
     });
@@ -112,6 +122,8 @@ export default function AnaliseTab({ refreshKey }) {
     const monthlyData = monthlySorted.map(m => ({
       month: fmtMonthBR(m.ym),
       captacao: m.captacao,
+      consorcio: m.consorcio,
+      pa: m.pa,
       r1: m.r1,
       r2: m.r2,
       ip_ap: m.ip_ap,
@@ -120,6 +132,9 @@ export default function AnaliseTab({ refreshKey }) {
       recomendacoes: m.recomendacoes,
       contas: m.contas,
       contas_totais: m.contas_totais,
+      pipe_proxima_semana: m.pipe_proxima_semana,
+      pipe_ip: m.pipe_ip,
+      pipe_ap: m.pipe_ap,
     }));
     const monthlyTotals = monthlySorted.length ? {
       captacao: monthlySorted.reduce((s, m) => s + m.captacao, 0),
@@ -288,6 +303,9 @@ export default function AnaliseTab({ refreshKey }) {
                   <SummaryCard label="Recomendações" value={String(weekEntry.recomendacoes || 0)} />
                   <SummaryCard label="Novas contas" value={String(weekEntry.contas || 0)} />
                   <SummaryCard label="Contas totais" value={String(weekEntry.contas_totais || 0)} />
+                  <SummaryCard label="PIPE próx. semana" value={fmtBRL(weekEntry.pipe_proxima_semana || 0)} />
+                  <SummaryCard label="PIPE IP" value={fmtBRL(weekEntry.pipe_ip || 0)} />
+                  <SummaryCard label="PIPE AP" value={fmtBRL(weekEntry.pipe_ap || 0)} />
                   <SummaryCard label="Pontos da semana" value={fmtPts(weekEntry.total_points || 0)} accent />
                 </div>
 
@@ -386,7 +404,50 @@ function ChartsGroup({ data, xKey, selected }) {
           </BarChart>
         </ResponsiveContainer>
       </ChartCard>
+
+      <MoneyCompareChart
+        data={data} xKey={xKey}
+        title={`PIPE × Captação — ${selected}`}
+        subtitle="PIPE da próxima semana vs. Captação realizada"
+        aKey="pipe_proxima_semana" aName="PIPE próx. semana" aColor="#6C9EFF"
+        bKey="captacao" bName="Captação" bColor="#A8E063"
+      />
+
+      <MoneyCompareChart
+        data={data} xKey={xKey}
+        title={`PIPE IP × PA — ${selected}`}
+        subtitle="PIPE IP vs. PA"
+        aKey="pipe_ip" aName="PIPE IP" aColor="#F2C94C"
+        bKey="pa" bName="PA" bColor="#A8E063"
+      />
+
+      <MoneyCompareChart
+        data={data} xKey={xKey}
+        title={`PIPE AP × Consórcio — ${selected}`}
+        subtitle="PIPE AP vs. Consórcio"
+        aKey="pipe_ap" aName="PIPE AP" aColor="#C084FC"
+        bKey="consorcio" bName="Consórcio" bColor="#A8E063"
+      />
     </>
+  );
+}
+
+// Grouped bar chart comparing two monetary (R$) series over the active period.
+function MoneyCompareChart({ data, xKey, title, subtitle, aKey, aName, aColor, bKey, bName, bColor }) {
+  return (
+    <ChartCard title={title} subtitle={subtitle}>
+      <ResponsiveContainer>
+        <BarChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#1A3225" />
+          <XAxis dataKey={xKey} tick={{ fill: '#8FA897', fontSize: 11, fontFamily: 'monospace' }} stroke="#224030" />
+          <YAxis tick={{ fill: '#8FA897', fontSize: 11, fontFamily: 'monospace' }} stroke="#224030" tickFormatter={(v) => fmtBRL(v).replace('R$ ', '')} width={70} />
+          <Tooltip contentStyle={tooltipStyle} labelStyle={{ color: '#A8E063' }} cursor={{ fill: 'rgba(168,224,99,0.06)' }} formatter={(v) => fmtBRL(v)} />
+          <Legend wrapperStyle={{ fontSize: 11, fontFamily: 'monospace' }} />
+          <Bar dataKey={aKey} name={aName} fill={aColor} radius={[3, 3, 0, 0]} />
+          <Bar dataKey={bKey} name={bName} fill={bColor} radius={[3, 3, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartCard>
   );
 }
 

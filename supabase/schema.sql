@@ -32,11 +32,19 @@ create table if not exists public.weekly_entries (
   contas numeric default 0,
   contas_totais numeric default 0,
   patrimonio_liquido numeric default 0,
+  pipe_proxima_semana numeric default 0,
+  pipe_ip numeric default 0,
+  pipe_ap numeric default 0,
   total_points numeric default 0,
   breakdown jsonb default '[]'::jsonb,
   created_date timestamptz not null default now(),
   updated_date timestamptz not null default now()
 );
+
+-- Migration (safe to re-run): add PIPE columns to an existing weekly_entries.
+alter table public.weekly_entries add column if not exists pipe_proxima_semana numeric default 0;
+alter table public.weekly_entries add column if not exists pipe_ip numeric default 0;
+alter table public.weekly_entries add column if not exists pipe_ap numeric default 0;
 
 -- Enable Row Level Security
 alter table public.team_members enable row level security;
