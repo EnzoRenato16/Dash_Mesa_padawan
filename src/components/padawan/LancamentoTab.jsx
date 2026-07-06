@@ -113,7 +113,7 @@ export default function LancamentoTab({ onSaved }) {
             Lançamento semanal
         <span className="font-mono text-[10.5px] uppercase tracking-wider text-[#8FA897] border border-[#224030] px-1.5 py-0.5 rounded">manual</span>
       </h2>
-      <p className="text-[11px] text-[#5C7466] mb-4">Captação, consórcio e patrimônio líquido são preenchidos pelo líder na aba "Líder".</p>
+      <p className="text-[11px] text-[#5C7466] mb-4">Captação, contas totais e patrimônio líquido são preenchidos pelo líder na aba "Líder".</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3.5">
         {/* Assessor + Semana */}
@@ -157,8 +157,8 @@ export default function LancamentoTab({ onSaved }) {
         <Field label="Novas contas abertas (quantidade)" hint="Meta semanal: 3">
           <input type="number" value={form.contas || ''} onChange={e => setNum('contas', e.target.value)} placeholder="0" className="field-input" min="0" />
         </Field>
-        <Field label="Contas totais (quantidade)" hint="Número total de contas">
-          <input type="number" value={form.contas_totais || ''} onChange={e => setNum('contas_totais', e.target.value)} placeholder="0" className="field-input" min="0" />
+        <Field label="Consórcio (R$)" hint="+2 pts a cada R$ 100k">
+          <input type="number" value={form.consorcio || ''} onChange={e => setNum('consorcio', e.target.value)} placeholder="0" className="field-input" min="0" step="1000" />
         </Field>
 
       </div>
