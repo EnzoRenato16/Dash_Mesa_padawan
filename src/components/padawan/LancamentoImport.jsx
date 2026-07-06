@@ -24,11 +24,14 @@ const FIELDS = [
   { key: 'contas', label: 'Novas contas', type: 'number' },
   { key: 'contas_totais', label: 'Contas totais', type: 'number' },
   { key: 'patrimonio_liquido', label: 'Patrimônio líquido (R$)', type: 'number' },
+  { key: 'pipe_proxima_semana', label: 'PIPE próxima semana (R$)', type: 'number' },
+  { key: 'pipe_ip', label: 'PIPE IP (R$)', type: 'number' },
+  { key: 'pipe_ap', label: 'PIPE AP (R$)', type: 'number' },
 ];
 
 const TEMPLATE_SAMPLES = [
-  ['Rodrigo Valpereiro', '2026-04-06', 734000, '', '', '', 10, 6, '', '', '', 15000, 1, 9, 34, 734000],
-  ['Lucas Fortes', '2026-06-08', 235000, '', '', '', 8, 4, '', 2, '', 0, 3, 5, 41, 270000],
+  ['Rodrigo Valpereiro', '2026-04-06', 734000, '', '', '', 10, 6, '', '', '', 15000, 1, 9, 34, 734000, 500000, 60000, 40000],
+  ['Lucas Fortes', '2026-06-08', 235000, '', '', '', 8, 4, '', 2, '', 0, 3, 5, 41, 270000, 300000, 20000, 15000],
 ];
 
 // Normalize header text for fuzzy matching (lowercase, no accents/punctuation)

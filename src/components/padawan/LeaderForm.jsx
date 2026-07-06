@@ -7,7 +7,7 @@ import { useToast } from '@/components/ui/use-toast';
 
 const LEADER_FIELDS = [
   { key: 'captacao', label: 'Captação total (R$)', hint: '+10 pts a cada R$ 200k', step: '1000' },
-  { key: 'consorcio', label: 'Consórcio (R$)', hint: '+2 pts a cada R$ 100k', step: '1000' },
+  { key: 'contas_totais', label: 'Contas totais (quantidade)', hint: 'Número total de contas', step: '1' },
   { key: 'patrimonio_liquido', label: 'Patrimônio Líquido Total (R$)', hint: 'Patrimônio líquido do assessor', step: '1000' },
 ];
 
@@ -16,7 +16,7 @@ export default function LeaderForm({ onSaved }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedId, setSelectedId] = useState('');
-  const [leaderFields, setLeaderFields] = useState({ captacao: 0, consorcio: 0, patrimonio_liquido: 0 });
+  const [leaderFields, setLeaderFields] = useState({ captacao: 0, contas_totais: 0, patrimonio_liquido: 0 });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function LeaderForm({ onSaved }) {
     if (selectedEntry) {
       setLeaderFields({
         captacao: selectedEntry.captacao || 0,
-        consorcio: selectedEntry.consorcio || 0,
+        contas_totais: selectedEntry.contas_totais || 0,
         patrimonio_liquido: selectedEntry.patrimonio_liquido || 0,
       });
     }
@@ -52,7 +52,7 @@ export default function LeaderForm({ onSaved }) {
     const { total: t, breakdown: bd } = calcPoints(merged);
     await db.entities.WeeklyEntry.update(selectedEntry.id, {
       captacao: leaderFields.captacao,
-      consorcio: leaderFields.consorcio,
+      contas_totais: leaderFields.contas_totais,
       patrimonio_liquido: leaderFields.patrimonio_liquido,
       total_points: t,
       breakdown: bd,
