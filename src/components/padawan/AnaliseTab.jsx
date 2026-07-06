@@ -300,6 +300,7 @@ export default function AnaliseTab({ refreshKey }) {
                   <SummaryCard label="R2" value={String(weekEntry.r2 || 0)} />
                   <SummaryCard label="Reuniões IP" value={String(weekEntry.reuniao_ip || 0)} />
                   <SummaryCard label="Reuniões AP" value={String(weekEntry.reuniao_ap || 0)} />
+                  <SummaryCard label="Reuniões totais" value={String((weekEntry.r1 || 0) + (weekEntry.r2 || 0) + (weekEntry.reuniao_ip || 0) + (weekEntry.reuniao_ap || 0))} />
                   <SummaryCard label="Recomendações" value={String(weekEntry.recomendacoes || 0)} />
                   <SummaryCard label="Novas contas" value={String(weekEntry.contas || 0)} />
                   <SummaryCard label="Contas totais" value={String(weekEntry.contas_totais || 0)} />
